@@ -1,0 +1,19 @@
+{
+  "name": "unoarm-urdf-control",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1"
+  },
+  "dependencies": {
+    "lucide": "^0.468.0",
+    "three": "^0.174.0",
+    "urdf-loader": "^0.12.4"
+  },
+  "devDependencies": {
+    "vite": "^6.2.2"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "region": {
+    "min": [
+      -0.6,
+      -0.9,
+      0.6
+    ],
+    "max": [
+      0.2,
+      -0.2,
+      1.1
+    ]
+  },
+  "modes": {
+    "angled_grasp": {
+      "label": "斜向抓取",
+      "json": "/models/angled_grasp_workspace_reachability.json",
+      "obj": "/models/angled_grasp_workspace_reachability.obj",
+      "stats": {
+        "total": 2000,
+        "ik_ok": 1472,
+        "ik_failed": 528,
+        "plan_ok": 1472,
+        "ik_rate": 0.736,
+        "plan_rate": 0.736,
+        "fitted_volume_m3": 0.21493600000000004,
+        "workspace_share": 0.7676285714285715
+      }
+    },
+    "side_grasp": {
+      "label": "侧面抓取",
+      "json": "/models/side_grasp_workspace_reachability.json",
+      "obj": "/models/side_grasp_workspace_reachability.obj",
+      "stats": {
+        "total": 2000,
+        "ik_ok": 853,
+        "ik_failed": 1147,
+        "plan_ok": 852,
+        "ik_rate": 0.4265,
+        "plan_rate": 0.426,
+        "fitted_volume_m3": 0.12561111111111115,
+        "workspace_share": 0.4486111111111112
+      }
+    },
+    "vertical_grasp": {
+      "label": "垂直抓取",
+      "json": "/models/vertical_grasp_workspace_reachability.json",
+      "obj": "/models/vertical_grasp_workspace_reachability.obj",
+      "stats": {
+        "total": 2000,
+        "ik_ok": 396,
+        "ik_failed": 1604,
+        "plan_ok": 392,
+        "ik_rate": 0.198,
+        "plan_rate": 0.196,
+        "fitted_volume_m3": 0.057606481481481495,
+        "workspace_share": 0.2057374338624339
+      }
+    }
+  }
+}

@@ -1,0 +1,36 @@
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: docker/unoarm-dev.Dockerfile
+      args:
+        USER_UID: ${UID:-1000}
+        USER_GID: ${GID:-1000}
+    image: unoarm-dev:humble
+    container_name: unoarm-dev
+    network_mode: host
+    ipc: host
+    stdin_open: true
+    tty: true
+    working_dir: /workspace/unoarm
+    environment:
+      DISPLAY: ${DISPLAY:-:0}
+      XAUTHORITY: /tmp/unoarm-docker.xauth
+      QT_X11_NO_MITSHM: "1"
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-25}
+      ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE:-SUBNET}
+      ROS_STATIC_PEERS: ${ROS_STATIC_PEERS:-192.168.10.200}
+      RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION:-rmw_cyclonedds_cpp}
+      WEB_CONTROL_HOST: ${WEB_CONTROL_HOST:-0.0.0.0}
+      WEB_CONTROL_PORT: ${WEB_CONTROL_PORT:-8765}
+      UNOARM_IN_DOCKER: "1"
+      TERM: ${TERM:-xterm-256color}
+    volumes:
+      - .:/workspace/unoarm
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ${UNOARM_DOCKER_XAUTH:-/tmp/unoarm-docker.xauth}:/tmp/unoarm-docker.xauth:ro
+      - unoarm_colcon_home:/home/unoarm/.colcon
+    command: bash
+
+volumes:
+  unoarm_colcon_home:

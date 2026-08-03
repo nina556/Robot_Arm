@@ -1,0 +1,32 @@
+{
+  "frame": "world",
+  "planning_frame": "base_link",
+  "right": {
+    "enabled": false,
+    "frame": "world",
+    "min": [
+      -0.5,
+      -0.7,
+      0.6
+    ],
+    "max": [
+      0.02,
+      -0.2,
+      1.1
+    ]
+  },
+  "left": {
+    "enabled": true,
+    "frame": "world",
+    "min": [
+      -0.02,
+      -0.7,
+      0.6
+    ],
+    "max": [
+      0.5,
+      -0.2,
+      1.1
+    ]
+  }
+}

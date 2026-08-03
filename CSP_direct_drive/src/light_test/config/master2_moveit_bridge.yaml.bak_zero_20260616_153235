@@ -1,0 +1,71 @@
+master2_moveit_bridge:
+  ros__parameters:
+    publish_rate_hz: 100.0
+    joint_names:
+    - Right_Joint1
+    - Right_Joint2
+    - Right_Joint3
+    - Right_Joint4
+    - Right_Joint5
+    - Right_Joint6
+    - Right_Joint7
+    zero_offsets:
+    - 4841112
+    - 8192000
+    - -235000
+    - 71720
+    - 8349312
+    - 87000
+    - 5305000
+    directions:
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    encoder_counts_per_rev:
+    - 8388608.0
+    - 8388608.0
+    - 8388608.0
+    - 8388608.0
+    - 8388608.0
+    - 8388608.0
+    - 8388608.0
+    gear_ratios:
+    - 1.0
+    - 1.0
+    - 1.0
+    - 1.0
+    - 1.0
+    - 1.0
+    - 1.0
+    limit_enabled:
+    - true
+    - true
+    - false
+    - true
+    - false
+    - true
+    - true
+    raw_limit_a:
+    - 4046288
+    - 8566544
+    - 0
+    - -670128
+    - 0
+    - 1492248
+    - 7226936
+    raw_limit_b:
+    - 6209560
+    - 6227048
+    - 0
+    - 3485168
+    - 0
+    - -1423928
+    - 3279352
+    max_step_per_cycle: 300
+    following_error_counts: 250000
+    goal_tolerance_counts: 5000
+    goal_timeout_sec: 5.0

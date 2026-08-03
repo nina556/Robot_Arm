@@ -1,0 +1,30 @@
+moveit_simple_controller_manager:
+  controller_names:
+    - arm_controller
+    - left_arm_controller
+
+  arm_controller:
+    action_ns: follow_joint_trajectory
+    type: FollowJointTrajectory
+    default: true
+    joints:
+      - Right_Joint1
+      - Right_Joint2
+      - Right_Joint3
+      - Right_Joint4
+      - Right_Joint5
+      - Right_Joint6
+      - Right_Joint7
+
+  left_arm_controller:
+    action_ns: follow_joint_trajectory
+    type: FollowJointTrajectory
+    default: true
+    joints:
+      - Left_Joint1
+      - Left_Joint2
+      - Left_Joint3
+      - Left_Joint4
+      - Left_Joint5
+      - Left_Joint6
+      - Left_Joint7

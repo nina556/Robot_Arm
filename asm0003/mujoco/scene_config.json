@@ -1,0 +1,14 @@
+{
+  "name": "定子放入槽",
+  "description": "从实体桌面抓取红色定子并放到左侧定子槽",
+  "object_x": 0.18,
+  "object_y": -0.6,
+  "table_x": 0.4,
+  "table_y": 0.3,
+  "plate_x": -0.08,
+  "plate_y": -0.72,
+  "calibration_block_x": 0.13,
+  "calibration_block_y": -0.62,
+  "objects": [],
+  "preset": "cube_to_plate"
+}

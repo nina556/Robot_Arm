@@ -1,0 +1,102 @@
+# UnoArm random target regions for tools/reachability_probe.py.
+#
+# Coordinates are in the same frame used by the web control planning API
+# (default: world).  x/y/z describe the desired gripper-center target; the
+# probe subtracts each arm's tool_offset before calling MoveIt IK, matching
+# web_control/web_control/server.py.
+
+frame_id: world
+moveit_request_frame: base_link
+seed: 7
+count: 200
+urdf: asm0003/urdf/asm0003.urdf
+joint_state_topic: /joint_states
+
+# Random points are generated from the configured region first, then rejected
+# if their 3D distance to the selected arm base is outside the URDF-derived
+# maximum arm extension radius.
+sampling:
+  enforce_arm_reach: true
+  max_resample_attempts: 1000
+
+# This matches asm0003/launch/web_control_moveit.launch.py.
+world_from_base_link:
+  xyz: [0.0, 0.0, 0.0]
+  rpy: [1.5708, 0.0, 0.0]
+
+arms:
+  right:
+    group: arm
+    base_link: right_base_link
+    tip_link: Right_Link7
+    joints: [Right_Joint1, Right_Joint2, Right_Joint3, Right_Joint4, Right_Joint5, Right_Joint6, Right_Joint7]
+    tool_offset: [0.0, 0.15, 0.0]
+  left:
+    group: left_arm
+    base_link: left_base_link
+    tip_link: Left_Link7
+    joints: [Left_Joint1, Left_Joint2, Left_Joint3, Left_Joint4, Left_Joint5, Left_Joint6, Left_Joint7]
+    tool_offset: [0.0, 0.15, 0.0]
+
+regions:
+  right_table_box:
+    sampler: box
+    arm: right
+    x: [-0.80, 0.35]
+    y: [-0.65, 0.25]
+    z: [0.75, 1.55]
+    roll: 3.1415926536
+    pitch: 0.0
+    yaw: [-3.1415926536, 3.1415926536]
+
+  left_table_box:
+    sampler: box
+    arm: left
+    x: [-0.35, 0.80]
+    y: [-0.65, 0.25]
+    z: [0.75, 1.55]
+    roll: 3.1415926536
+    pitch: 0.0
+    yaw: [-3.1415926536, 3.1415926536]
+
+  right_cylindrical_shell:
+    sampler: cylinder
+    arm: right
+    center: [-0.225, -0.155]
+    radius: [0.15, 0.70]
+    theta: [-2.8, 1.0]
+    z: [0.80, 1.50]
+    roll: 3.1415926536
+    pitch: 0.0
+    yaw: [-3.1415926536, 3.1415926536]
+
+checkers:
+  # Fast offline pre-filter. Does not prove IK or collision-free planning.
+  - name: geometry
+
+  # Enable these when MoveIt is running:
+  # - name: moveit_ik
+  # - name: moveit_plan
+  #   planner_id: RRTConnectkConfigDefault
+
+geometry:
+  min_reach: 0.04
+  reach_margin: 0.0
+
+moveit_ik:
+  service: /compute_ik
+  timeout_sec: 2.0
+  wait_service_sec: 8.0
+  avoid_collisions: true
+  use_current_state: true
+
+moveit_plan:
+  ik_service: /compute_ik
+  plan_service: /plan_kinematic_path
+  ik_timeout_sec: 2.0
+  planning_time_sec: 3.0
+  wait_service_sec: 8.0
+  attempts: 3
+  avoid_collisions: true
+  velocity_scaling: 0.05
+  acceleration_scaling: 0.05

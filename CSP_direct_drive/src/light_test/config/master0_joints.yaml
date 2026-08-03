@@ -1,0 +1,46 @@
+master0_encoder_publisher:
+  ros__parameters:
+    publish_rate_hz: 100.0
+    master_id: 0
+    eni_path: "/home/niic/workspace/unoarm/CSP_direct_drive/src/light_test/config/NIIC_ENI_M0.xml"
+    topic_prefix: "master0"
+    joint_names:
+    - Left_Joint1
+    - Left_Joint2
+    - Left_Joint3
+    - Left_Joint4
+    - Left_Joint5
+    - Left_Joint6
+    - Left_Joint7
+    zero_offsets:
+    - 773808
+    - 22000
+    - -55832
+    - 51520
+    - 8361632
+    - -33720
+    - 7926976
+    directions:
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    encoder_counts_per_rev:
+    - 8388608.0
+    - 8388608.0
+    - 8388608.0
+    - 8388608.0
+    - 8388608.0
+    - 8388608.0
+    - 8388608.0
+    gear_ratios:
+    - 1.0
+    - 1.0
+    - 1.0
+    - 1.0
+    - 1.0
+    - 1.0
+    - 1.0

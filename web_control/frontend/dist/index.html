@@ -1,0 +1,743 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#11181c" />
+    <title>UnoArm 控制台</title>
+    <script type="module" crossorigin src="/assets/index-PFIrrCDj.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DSojew0r.css">
+  </head>
+  <body>
+    <div id="app" class="app-shell">
+      <header class="app-header">
+        <div class="brand-block">
+          <div class="brand-mark" aria-hidden="true"><i data-lucide="bot"></i></div>
+          <div>
+            <h1>UnoArm 控制台</h1>
+            <span>R007 · 双臂机器人</span>
+          </div>
+        </div>
+
+        <div class="status-strip" aria-label="系统状态">
+          <div class="status-item" id="statusConnection" data-state="pending">
+            <span class="status-dot"></span><b>控制服务</b><span>连接中</span>
+          </div>
+          <div class="status-item" id="statusPlan" data-state="neutral">
+            <span class="status-dot"></span><b>规划</b><span>未就绪</span>
+          </div>
+          <div class="status-item" id="statusTcp" data-state="neutral">
+            <span class="status-dot"></span><b>末端位置</b><span>等待数据</span>
+          </div>
+          <div class="status-item" id="statusVision" data-state="neutral">
+            <span class="status-dot"></span><b>视觉</b><span>未读取</span>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button class="button danger emergency-button" id="emergencyStop" type="button">
+            <i data-lucide="octagon-alert"></i><span>紧急停止</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <nav class="tool-rail" aria-label="功能导航">
+          <button class="rail-button active" type="button" data-panel="motion" aria-label="运动规划" title="运动规划">
+            <i data-lucide="move-3d"></i>
+            <span>运动规划</span>
+          </button>
+          <button class="rail-button" type="button" data-panel="ompl" aria-label="OMPL 配置" title="OMPL 配置">
+            <i data-lucide="sliders-horizontal"></i>
+            <span>OMPL 配置</span>
+          </button>
+          <button class="rail-button" type="button" data-panel="benchmark" aria-label="跑分" title="跑分">
+            <i data-lucide="gauge"></i>
+            <span>跑分</span>
+          </button>
+          <button class="rail-button" type="button" data-panel="vision" aria-label="视觉与点云" title="视觉与点云">
+            <i data-lucide="scan-eye"></i>
+            <span>视觉点云</span>
+          </button>
+          <button class="rail-button" type="button" data-panel="camera-calibration" aria-label="相机标定" title="相机标定">
+            <i data-lucide="camera"></i>
+            <span>相机标定</span>
+          </button>
+          <button class="rail-button" type="button" data-panel="calibration" aria-label="关节配置" title="关节配置">
+            <i data-lucide="sliders-horizontal"></i>
+            <span>关节配置</span>
+          </button>
+          <button class="rail-button" type="button" data-panel="library" aria-label="点位与序列" title="点位与序列">
+            <i data-lucide="list-tree"></i>
+            <span>点位序列</span>
+          </button>
+          <button class="rail-button" type="button" data-panel="vlm" aria-label="VLM 配置" title="VLM 配置">
+            <i data-lucide="brain-circuit"></i>
+            <span>VLM</span>
+          </button>
+          <button class="rail-button" type="button" data-panel="poses" aria-label="姿态库" title="姿态库">
+            <i data-lucide="person-standing"></i>
+            <span>姿态库</span>
+          </button>
+          <button class="rail-button" type="button" data-panel="logs" aria-label="系统日志" title="系统日志">
+            <i data-lucide="scroll-text"></i>
+            <span>系统日志</span>
+          </button>
+          <div class="rail-spacer"></div>
+          <button class="rail-button" id="toggleInspector" type="button" aria-label="切换状态面板" title="切换状态面板">
+            <i data-lucide="panel-right"></i>
+            <span>状态面板</span>
+          </button>
+        </nav>
+
+        <aside class="control-panel" id="controlPanel">
+          <div class="panel-section arm-selector-section">
+            <div class="section-heading">
+              <div><span class="eyebrow">ACTIVE ARM</span><h2>当前控制臂</h2></div>
+              <span class="arm-dof">7 DOF</span>
+            </div>
+            <div class="segmented-control" role="tablist" aria-label="当前控制臂">
+              <button id="rightArmButton" class="active" type="button" data-arm="right" role="tab" aria-selected="true">右臂</button>
+              <button id="leftArmButton" type="button" data-arm="left" role="tab" aria-selected="false">左臂</button>
+            </div>
+          </div>
+
+          <div class="panel-content active" data-panel-content="motion">
+            <section class="panel-section">
+              <div class="section-heading">
+                <div><span class="eyebrow">MOTION</span><h2>目标位姿</h2></div>
+                <button class="icon-button" id="syncTcpButton" type="button" aria-label="同步当前末端位置" title="同步当前末端位置">
+                  <i data-lucide="crosshair"></i>
+                </button>
+              </div>
+              <div class="pose-grid" id="poseFields"></div>
+            </section>
+
+            <section class="panel-section">
+              <div class="range-field">
+                <div class="range-label"><label for="velocityScaling">速度</label><output id="velocityValue">0.15</output></div>
+                <input id="velocityScaling" type="range" min="0.01" max="0.30" step="0.01" value="0.15" />
+              </div>
+              <div class="range-field">
+                <div class="range-label"><label for="accelerationScaling">加速度</label><output id="accelerationValue">0.10</output></div>
+                <input id="accelerationScaling" type="range" min="0.01" max="0.30" step="0.01" value="0.10" />
+              </div>
+              <div class="toggle-row">
+                <label><input id="avoidPlatform" type="checkbox" checked /><span>启用平台避障</span></label>
+              </div>
+              <div class="segmented-control grasp-mode" id="graspPoseMode" role="tablist" aria-label="末端姿态方案">
+                <button type="button" data-grasp-mode="vertical" role="tab">垂直抓取</button>
+                <button type="button" data-grasp-mode="side" role="tab">侧面抓取</button>
+                <button type="button" data-grasp-mode="z_parallel" role="tab">斜向抓取</button>
+              </div>
+              <div class="decision-preview compact" id="activeDecisionPreview" aria-live="polite"></div>
+              <div class="workspace-bounds-panel" id="workspaceBoundsFields"></div>
+              <button class="button wide" id="saveWorkspaceBoundsButton" type="button"><i data-lucide="box"></i><span>保存工作区边界</span></button>
+              <p class="inline-status" id="workspaceBoundsState">工作区边界未读取</p>
+              <div class="command-row">
+                <button class="button primary" id="planButton" type="button"><i data-lucide="route"></i><span>开始规划</span></button>
+                <button class="button execute" id="executeButton" type="button"><i data-lucide="play"></i><span>执行规划</span></button>
+              </div>
+              <div class="command-row secondary">
+                <button class="button" id="readVisionButton" type="button"><i data-lucide="focus"></i><span>读取视觉目标</span></button>
+                <button class="button" id="savePointQuickButton" type="button"><i data-lucide="map-pin-plus"></i><span>保存点位</span></button>
+              </div>
+            </section>
+
+          </div>
+
+          <div class="panel-content" data-panel-content="ompl">
+            <section class="panel-section ompl-section">
+              <div class="section-heading">
+                <div><span class="eyebrow">OMPL</span><h2>规划器配置</h2></div>
+                <button class="icon-button" id="reloadOmplConfigButton" type="button" aria-label="重新读取 OMPL 配置" title="重新读取 OMPL 配置">
+                  <i data-lucide="refresh-cw"></i>
+                </button>
+              </div>
+              <div class="solver-control ompl-preset-control">
+                <label for="omplPresetSelect">配置模板</label>
+                <select id="omplPresetSelect" aria-label="OMPL 配置模板"></select>
+                <button class="button primary" id="applyOmplPresetButton" type="button">
+                  <i data-lucide="circle-check"></i><span>应用模板</span>
+                </button>
+              </div>
+              <div class="solver-control ompl-save-control">
+                <label for="omplPresetName">保存到预设库</label>
+                <input id="omplPresetName" type="text" maxlength="64" placeholder="自定义名称" />
+                <button class="button" id="saveOmplPresetButton" type="button">
+                  <i data-lucide="save"></i><span>保存</span>
+                </button>
+                <button class="button danger subtle" id="deleteOmplPresetButton" type="button">
+                  <i data-lucide="trash-2"></i><span>删除</span>
+                </button>
+              </div>
+              <div class="solver-control ompl-planner-control">
+                <label for="omplPlannerSelect">规划器</label>
+                <select id="omplPlannerSelect" aria-label="OMPL 规划器"></select>
+              </div>
+              <div class="compact-fields ompl-runtime-fields">
+                <label>规划时间<input id="omplPlanningTime" type="number" min="0.1" max="30" step="0.1" value="1.0" /><span>s</span></label>
+                <label>尝试次数<input id="omplAttempts" type="number" min="1" max="20" step="1" value="1" /></label>
+                <label>IK 超时<input id="omplIkTimeout" type="number" min="0.05" max="10" step="0.05" value="0.6" /><span>s</span></label>
+              </div>
+              <p class="inline-status" id="omplConfigStatus">配置未读取</p>
+            </section>
+
+            <section class="panel-section">
+              <div class="section-heading"><div><span class="eyebrow">RECOMMENDED</span><h2>推荐配置</h2></div></div>
+              <div class="ompl-recommendation" id="omplRecommended"></div>
+            </section>
+
+            <section class="panel-section">
+              <div class="section-heading"><div><span class="eyebrow">PLANNER CONFIG</span><h2>当前配置</h2></div></div>
+              <div class="ompl-detail-list" id="omplPlannerDetails"></div>
+            </section>
+          </div>
+
+          <div class="panel-content" data-panel-content="benchmark">
+            <section class="panel-section reachability-visibility-section">
+              <div class="section-heading">
+                <div><span class="eyebrow">3D OVERLAY</span><h2>可达空间</h2></div>
+                <label class="visibility-switch" for="reachabilityOverlayToggle">
+                  <input id="reachabilityOverlayToggle" type="checkbox" checked />
+                  <span class="visibility-switch-track" aria-hidden="true"></span>
+                  <span id="reachabilityOverlayToggleLabel">显示</span>
+                </label>
+              </div>
+            </section>
+
+            <section class="panel-section benchmark-section">
+              <div class="section-heading">
+                <div><span class="eyebrow">BENCHMARK</span><h2>规划器跑分</h2></div>
+                <span class="state-badge" id="benchmarkState">未生成</span>
+              </div>
+              <div class="benchmark-dashboard" id="benchmarkQuickStats" aria-live="polite"></div>
+
+              <div class="benchmark-block">
+                <div class="benchmark-block-title"><b>测试点</b><small>IK 通过后才计入有效点</small></div>
+                <div class="solver-control">
+                  <label for="benchmarkCollisionBox">碰撞箱</label>
+                  <select id="benchmarkCollisionBox" aria-label="跑分碰撞箱"></select>
+                </div>
+                <div class="compact-fields benchmark-fields">
+                  <label>箱上点<input id="benchmarkBoxCount" type="number" min="0" max="120" step="1" value="5" /><span>个</span></label>
+                  <label>上方高度<input id="benchmarkBoxOffsetCm" type="number" min="0" max="200" step="0.5" value="5" /><span>cm</span></label>
+                  <label>边缘点<input id="benchmarkEdgeCount" type="number" min="0" max="120" step="1" value="5" /><span>个</span></label>
+                  <label>边缘距离<input id="benchmarkEdgeDistanceCm" type="number" min="0" max="200" step="0.5" value="5" /><span>cm</span></label>
+                  <label>随机点<input id="benchmarkRandomCount" type="number" min="0" max="120" step="1" value="10" /><span>个</span></label>
+                  <label>种子<input id="benchmarkSeed" type="number" min="1" step="1" placeholder="随机" /></label>
+                </div>
+              </div>
+
+              <div class="benchmark-block">
+                <div class="benchmark-block-title"><b>规划器</b><small>对有效点统计成功率</small></div>
+                <div class="compact-fields benchmark-fields">
+                  <label>规划时间<input id="benchmarkPlanningTime" type="number" min="0.1" max="30" step="0.1" value="1.0" /><span>s</span></label>
+                  <label>尝试次数<input id="benchmarkAttempts" type="number" min="1" max="20" step="1" value="1" /></label>
+                  <label>IK 超时<input id="benchmarkIkTimeout" type="number" min="0.05" max="10" step="0.05" value="0.6" /><span>s</span></label>
+                </div>
+                <div class="planner-list" id="benchmarkPlanners"></div>
+              </div>
+
+              <div class="command-row benchmark-actions">
+                <button class="button" id="generateBenchmarkButton" type="button"><i data-lucide="refresh-cw"></i><span>生成点</span></button>
+                <button class="button primary" id="runBenchmarkButton" type="button"><i data-lucide="route"></i><span>开始跑分</span></button>
+              </div>
+              <div class="solver-control benchmark-preset-control">
+                <label for="benchmarkPresetName">保存跑分配置</label>
+                <input id="benchmarkPresetName" type="text" maxlength="64" placeholder="预设名称" />
+                <button class="button" id="saveBenchmarkPresetButton" type="button"><i data-lucide="save"></i><span>保存配置</span></button>
+                <button class="button" id="exportBenchmarkCsvButton" type="button"><i data-lucide="arrow-down-to-line"></i><span>导出CSV</span></button>
+              </div>
+              <p class="inline-status" id="benchmarkStatus">等待生成测试点</p>
+              <div class="benchmark-progress" id="benchmarkProgress" hidden>
+                <div class="benchmark-progress-head">
+                  <b id="benchmarkProgressStage">等待跑分</b>
+                  <span id="benchmarkProgressPercent">0%</span>
+                </div>
+                <div class="benchmark-progress-bar"><span id="benchmarkProgressBar"></span></div>
+                <p id="benchmarkProgressMeta">尚未开始</p>
+              </div>
+            </section>
+
+            <section class="panel-section">
+              <div class="section-heading"><div><span class="eyebrow">RESULT</span><h2>成功率</h2></div></div>
+              <div class="benchmark-summary" id="benchmarkSummary"></div>
+            </section>
+
+            <section class="panel-section">
+              <div class="section-heading"><div><span class="eyebrow">POINTS</span><h2>测试点</h2></div><span class="muted-value" id="benchmarkSetBadge">0/0</span></div>
+              <div class="item-list benchmark-samples" id="benchmarkSamples"></div>
+            </section>
+          </div>
+
+          <div class="panel-content" data-panel-content="vision">
+            <section class="panel-section sim-camera-section">
+              <div class="section-heading">
+                <div><span class="eyebrow">HEAD D455 · EYE-TO-HAND</span><h2>头顶 D455</h2></div>
+                <span id="simCameraState" class="state-badge">等待画面</span>
+              </div>
+              <div class="sim-camera-frame">
+                <img id="simCameraImage" alt="MuJoCo 头顶 D455 画面" />
+                <span id="simCameraPlaceholder">启动 MuJoCo 后显示头顶 D455 真实视角</span>
+              </div>
+              <p class="inline-status" id="simCameraInfo">/mujoco_camera/color/image_raw</p>
+              <button class="button primary wide" id="pickMujocoObjectButton" type="button"><i data-lucide="package-check"></i><span>获取坐标并抓取红色物体</span></button>
+              <button class="button wide" id="pickPlacePlateButton" type="button"><i data-lucide="package-open"></i><span>拿起定子</span></button>
+              <button class="button wide" id="leftDropCylinderButton" type="button"><i data-lucide="arrow-down-to-line"></i><span>智能抓取转子到圆柱中心</span></button>
+              <button class="button wide" id="pickPlaceTableButton" type="button"><i data-lucide="undo-2"></i><span>抓取并放回桌面原位</span></button>
+              <p class="inline-status" id="pickPlaceStatus"></p>
+            </section>
+
+            <section class="panel-section sim-camera-section wrist-camera-card">
+              <div class="wrist-camera-heading">
+                <div><span class="eyebrow">RIGHT WRIST · EYE-IN-HAND</span><h3>右腕 RGB-D</h3></div>
+                <span id="rightWristCameraState" class="state-badge">等待画面</span>
+              </div>
+              <div class="sim-camera-frame">
+                <img id="rightWristCameraImage" alt="MuJoCo 右腕 RGB-D 画面" />
+                <span id="rightWristCameraPlaceholder">等待右腕 RGB-D</span>
+              </div>
+              <p class="inline-status" id="rightWristCameraInfo">/right_wrist_camera/color/image_raw</p>
+            </section>
+
+            <section class="panel-section sim-camera-section wrist-camera-card">
+              <div class="wrist-camera-heading">
+                <div><span class="eyebrow">LEFT WRIST · EYE-IN-HAND</span><h3>左腕 RGB-D</h3></div>
+                <span id="leftWristCameraState" class="state-badge">等待画面</span>
+              </div>
+              <div class="sim-camera-frame">
+                <img id="leftWristCameraImage" alt="MuJoCo 左腕 RGB-D 画面" />
+                <span id="leftWristCameraPlaceholder">等待左腕 RGB-D</span>
+              </div>
+              <p class="inline-status" id="leftWristCameraInfo">/left_wrist_camera/color/image_raw</p>
+            </section>
+
+            <section class="panel-section">
+              <div class="section-heading">
+                <div><span class="eyebrow">EXTRINSIC</span><h2>摄像头外参</h2></div>
+                <button class="icon-button" id="reloadExtrinsicButton" type="button" aria-label="重新读取外参" title="重新读取外参"><i data-lucide="refresh-cw"></i></button>
+              </div>
+              <div class="pose-grid camera-grid" id="cameraFields"></div>
+              <button class="button primary wide" id="saveExtrinsicButton" type="button"><i data-lucide="save"></i><span>保存外参配置</span></button>
+              <p class="inline-status" id="extrinsicStatus">配置未读取</p>
+            </section>
+
+            <section class="panel-section">
+              <div class="section-heading"><div><span class="eyebrow">POINT CLOUD</span><h2>场景点云</h2></div><span id="cloudState" class="state-badge">未连接</span></div>
+              <div class="action-grid">
+                <button class="button" id="toggleCloudButton" type="button"><i data-lucide="cloud"></i><span>隐藏点云</span></button>
+                <button class="button" id="saveCloudButton" type="button"><i data-lucide="cloud-download"></i><span>保存场景</span></button>
+                <button class="button" id="loadPlatformButton" type="button"><i data-lucide="box"></i><span>显示避障区</span></button>
+                <button class="button" id="applyPlatformButton" type="button"><i data-lucide="shield-check"></i><span>应用避障区</span></button>
+                <button class="button wide" id="rebuildCloudButton" type="button"><i data-lucide="refresh-cw"></i><span>按当前外参重建点云</span></button>
+              </div>
+              <p class="inline-status" id="platformState">避障区未加载</p>
+            </section>
+
+            <section class="panel-section collision-section">
+              <div class="section-heading">
+                <div><span class="eyebrow">COLLISION</span><h2>手动碰撞箱</h2></div>
+                <button class="icon-button" id="addCollisionBoxButton" type="button" aria-label="添加碰撞箱" title="添加碰撞箱"><i data-lucide="plus"></i></button>
+              </div>
+              <div class="action-grid">
+                <button class="button" id="saveCollisionBoxesButton" type="button"><i data-lucide="save"></i><span>保存配置</span></button>
+                <button class="button" id="applyCollisionBoxesButton" type="button"><i data-lucide="shield-check"></i><span>提前应用</span></button>
+                <button class="button wide" id="clearCollisionBoxesButton" type="button"><i data-lucide="shield-alert"></i><span>从 MoveIt 清除</span></button>
+              </div>
+              <div class="manual-collision-list" id="manualCollisionFields"></div>
+              <p class="inline-status" id="manualCollisionState">手动碰撞箱未读取</p>
+            </section>
+          </div>
+
+          <div class="panel-content" data-panel-content="camera-calibration">
+            <section class="panel-section camera-calibration-section">
+              <div class="section-heading">
+                <div><span class="eyebrow">FIXED HEAD RGB-D</span><h2>头部相机标定</h2></div>
+                <span class="state-badge" id="cameraCalibrationState">未采样</span>
+              </div>
+              <div class="camera-calibration-source">
+                <div class="camera-calibration-source-row">
+                  <span><b>/mujoco_camera</b><small>RGB-D 红色目标 · 固定外参</small></span>
+                  <span class="state-badge" data-state="good">参与标定</span>
+                </div>
+                <div class="camera-calibration-source-row">
+                  <span><b>左右腕 RGB-D</b><small>随关节状态计算动态外参</small></span>
+                  <span class="state-badge">不参与</span>
+                </div>
+              </div>
+              <div class="camera-calibration-fixtures">
+                <span><b>场景标定物</b><small>同步控制网页与 MuJoCo</small></span>
+                <div class="camera-calibration-fixture-switches">
+                  <label class="visibility-switch" for="cameraCalibrationPlateToggle">
+                    <input id="cameraCalibrationPlateToggle" type="checkbox" checked />
+                    <span class="visibility-switch-track" aria-hidden="true"></span>
+                    <span>盘子</span>
+                  </label>
+                  <label class="visibility-switch" for="cameraCalibrationBlockToggle">
+                    <input id="cameraCalibrationBlockToggle" type="checkbox" checked />
+                    <span class="visibility-switch-track" aria-hidden="true"></span>
+                    <span>标定块</span>
+                  </label>
+                </div>
+              </div>
+              <div class="sim-camera-frame camera-calibration-preview">
+                <img id="cameraCalibrationImage" src="/mujoco_camera/stream.mjpg" alt="头部相机标定实时画面" />
+              </div>
+              <div class="camera-calibration-points" id="cameraCalibrationPoints"></div>
+              <div class="command-row camera-calibration-actions">
+                <button class="button primary" id="runCameraCalibrationButton" type="button"><i data-lucide="play"></i><span>自动采集 19 点</span></button>
+                <button class="button" id="clearCameraCalibrationButton" type="button"><i data-lucide="trash-2"></i><span>清空</span></button>
+              </div>
+              <p class="inline-status" id="cameraCalibrationStatus">等待采集固定头部相机数据</p>
+            </section>
+
+            <section class="panel-section camera-calibration-section">
+              <div class="section-heading">
+                <div><span class="eyebrow">MULTI-POINT RESULT</span><h2>多点误差</h2></div>
+                <span class="muted-value" id="cameraCalibrationCount">0 / 19</span>
+              </div>
+              <div class="camera-calibration-results" id="cameraCalibrationResults"></div>
+              <div class="camera-calibration-metrics" id="cameraCalibrationMetrics"></div>
+              <div class="camera-calibration-diagnosis" id="cameraCalibrationDiagnosis" data-state="neutral">等待三高度多点采集</div>
+              <button class="button primary wide" id="applyCameraTranslationButton" type="button" disabled><i data-lucide="save"></i><span>应用刚体外参拟合</span></button>
+            </section>
+          </div>
+
+          <div class="panel-content" data-panel-content="calibration">
+            <section class="panel-section solver-section">
+              <div class="section-heading">
+                <div><span class="eyebrow">IK SOLVER</span><h2>MoveIt 求解器</h2></div>
+                <button class="icon-button" id="reloadKinematicsButton" type="button" aria-label="读取求解器配置" title="读取求解器配置"><i data-lucide="refresh-cw"></i></button>
+              </div>
+              <div class="solver-control">
+                <label for="ikSolverSelect">求解器</label>
+                <select id="ikSolverSelect" aria-label="IK 求解器"></select>
+                <button class="button primary" id="saveKinematicsButton" type="button"><i data-lucide="save"></i><span>保存求解器</span></button>
+              </div>
+              <div class="solver-readout">
+                <span id="ikRightSolver">右臂 --</span>
+                <span id="ikLeftSolver">左臂 --</span>
+              </div>
+              <p class="inline-status" id="kinematicsStatus">配置未读取</p>
+            </section>
+
+            <section class="panel-section calibration-section">
+              <div class="section-heading">
+                <div><span class="eyebrow">CALIBRATION</span><h2>关节零位与限位</h2></div>
+                <button class="icon-button" id="loadJointConfigButton" type="button" aria-label="读取关节配置" title="读取关节配置"><i data-lucide="refresh-cw"></i></button>
+              </div>
+              <p class="inline-status" id="jointConfigStatus">配置未读取</p>
+              <div class="joint-config-table" id="jointConfigFields"></div>
+              <button class="button primary wide" id="saveJointConfigButton" type="button"><i data-lucide="save"></i><span>保存关节配置</span></button>
+            </section>
+          </div>
+
+          <div class="panel-content" data-panel-content="library">
+            <section class="panel-section">
+              <div class="section-heading"><div><span class="eyebrow">POSITIONS</span><h2>点位</h2></div></div>
+              <div class="inline-form">
+                <input id="pointName" type="text" placeholder="点位名称" />
+                <button class="icon-button primary" id="savePointButton" type="button" aria-label="保存点位" title="保存点位"><i data-lucide="plus"></i></button>
+              </div>
+              <div class="item-list" id="pointsList"></div>
+            </section>
+
+            <section class="panel-section">
+              <div class="section-heading"><div><span class="eyebrow">PRESETS</span><h2>抓取预设</h2></div></div>
+              <div class="inline-form">
+                <input id="presetName" type="text" placeholder="预设名称" />
+                <button class="icon-button primary" id="savePresetButton" type="button" aria-label="保存抓取预设" title="保存抓取预设"><i data-lucide="plus"></i></button>
+              </div>
+              <div class="item-list" id="presetsList"></div>
+            </section>
+
+            <section class="panel-section">
+              <div class="section-heading"><div><span class="eyebrow">SEQUENCE</span><h2>动作序列</h2></div></div>
+              <div class="inline-form sequence-form">
+                <select id="sequenceType" aria-label="动作类型">
+                  <option value="approach">接近</option>
+                  <option value="grasp">抓取</option>
+                  <option value="lift">抬起</option>
+                  <option value="move">移动</option>
+                  <option value="release">释放</option>
+                  <option value="close">闭合</option>
+                  <option value="pick">自动夹取</option>
+                  <option value="wait">等待</option>
+                </select>
+                <button class="icon-button" id="addSequenceButton" type="button" aria-label="添加动作步骤" title="添加动作步骤"><i data-lucide="plus"></i></button>
+              </div>
+              <div class="item-list sequence-list" id="sequenceList"></div>
+              <div class="command-row">
+                <button class="button" id="clearSequenceButton" type="button"><i data-lucide="trash-2"></i><span>清空</span></button>
+                <button class="button execute" id="executeSequenceButton" type="button"><i data-lucide="list-checks"></i><span>执行序列</span></button>
+              </div>
+            </section>
+          </div>
+
+          <div class="panel-content" data-panel-content="vlm">
+            <section class="panel-section">
+              <div class="section-heading">
+                <div><span class="eyebrow">VLM</span><h2>VLM 配置</h2></div>
+                <button class="icon-button" id="reloadVlmButton" type="button" aria-label="重载配置" title="重载配置"><i data-lucide="refresh-cw"></i></button>
+              </div>
+              <div class="vlm-fields">
+                <label class="vlm-field">
+                  <span class="field-label">API Key</span>
+                  <input id="vlmApiKey" type="password" class="text-input" placeholder="sk-..." autocomplete="off" />
+                </label>
+                <label class="vlm-field">
+                  <span class="field-label">Base URL</span>
+                  <input id="vlmBaseUrl" type="text" class="text-input" placeholder="https://api.siliconflow.cn/v1" />
+                </label>
+                <label class="vlm-field">
+                  <span class="field-label">模型名称</span>
+                  <input id="vlmModel" type="text" class="text-input" placeholder="Qwen/Qwen3-VL-8B-Instruct" />
+                </label>
+                <label class="vlm-field vlm-field-full">
+                  <span class="field-label">提示词</span>
+                  <textarea id="vlmPrompt" rows="3" class="text-input" placeholder="识别图像中的目标物体并给出归一化边界框"></textarea>
+                </label>
+                <div class="compact-fields">
+                  <label>X 偏移<input id="vlmOffsetX" type="number" step="0.001" value="0" /></label>
+                  <label>Y 偏移<input id="vlmOffsetY" type="number" step="0.001" value="0" /></label>
+                </div>
+                <label class="vlm-field"><span class="field-label">Z 偏移</span><input id="vlmOffsetZ" type="number" step="0.001" value="-0.1" class="text-input" /></label>
+              </div>
+              <button class="button primary wide" id="saveVlmButton" type="button"><i data-lucide="save"></i><span>保存配置</span></button>
+              <p class="inline-status" id="vlmStatus">配置未读取</p>
+            </section>
+            <section class="panel-section">
+              <div class="section-heading">
+                <div><span class="eyebrow">EXECUTE</span><h2>智能抓取</h2></div>
+              </div>
+              <label class="vlm-field vlm-field-full">
+                <span class="field-label">指令</span>
+                <input id="vlmGraspPrompt" type="text" class="text-input" placeholder="抓取面前桌面上的红色矩形" value="抓取面前桌面上的红色矩形" />
+              </label>
+              <button class="button primary wide" id="vlmConfirmButton" type="button"><i data-lucide="play"></i><span>确认执行</span></button>
+              <div id="vlmStageBox" class="vlm-stage-box" style="display:none">
+                <div class="vlm-stage-icon" id="vlmStageSpinner"></div>
+                <span class="vlm-stage-text" id="vlmStageText">等待中...</span>
+              </div>
+              <div id="vlmOutputBox" class="vlm-output-box" style="display:none">
+                <div class="vlm-output-row" id="vlmOutVlm" style="display:none">
+                  <span class="vlm-output-label">目标识别</span>
+                  <span class="vlm-output-value" id="vlmOutVlmVal">-</span>
+                </div>
+                <div class="vlm-output-row" id="vlmOutBbox" style="display:none">
+                  <span class="vlm-output-label">边界框</span>
+                  <span class="vlm-output-value" id="vlmOutBboxVal">-</span>
+                </div>
+                <div class="vlm-output-row" id="vlmOutPixel" style="display:none">
+                  <span class="vlm-output-label">2D 中心像素</span>
+                  <span class="vlm-output-value" id="vlmOutPixelVal">-</span>
+                </div>
+                <div class="vlm-output-row" id="vlmOutDepth" style="display:none">
+                  <span class="vlm-output-label">物体距离</span>
+                  <span class="vlm-output-value" id="vlmOutDepthVal">-</span>
+                </div>
+                <div class="vlm-output-row" id="vlmOutWorld" style="display:none">
+                  <span class="vlm-output-label">世界坐标</span>
+                  <span class="vlm-output-value" id="vlmOutWorldVal">-</span>
+                </div>
+                <div class="vlm-output-row" id="vlmOutPick" style="display:none">
+                  <span class="vlm-output-label">抓取结果</span>
+                  <span class="vlm-output-value" id="vlmOutPickVal">-</span>
+                </div>
+              </div>
+              <p class="inline-status" id="vlmGraspStatus"></p>
+            </section>
+            <section class="panel-section">
+              <div class="section-heading">
+                <div><span class="eyebrow">SCENE</span><h2>场景控制</h2></div>
+              </div>
+              <label class="vlm-field scene-preset-field">
+                <span class="field-label">场景预设</span>
+                <select id="scenePreset" class="text-input">
+                  <option value="basic_pick">基础方块抓取</option>
+                  <option value="cube_to_plate">定子放入槽</option>
+                  <option value="obstacle_pick">绕障抓取训练</option>
+                  <option value="custom">自定义场景</option>
+                </select>
+              </label>
+              <p class="scene-preset-description" id="scenePresetDescription">桌面中央单方块抓取练习</p>
+              <span class="field-label">方块位置 (桌面 X/Y)</span>
+              <div class="compact-fields">
+                <label>X<input id="objX" type="number" step="0.01" value="0" /></label>
+                <label>Y<input id="objY" type="number" step="0.01" value="-0.73" /></label>
+              </div>
+              <button class="button wide" id="moveObjectButton" type="button"><i data-lucide="move-3d"></i><span>移动方块</span></button>
+              <div style="margin:10px 0;display:flex;gap:16px">
+                <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer"><input type="checkbox" id="showPlate" /> 定子槽</label>
+                <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer"><input type="checkbox" id="showCylinder" /> 绿色圆柱</label>
+              </div>
+              <div id="platePositionFields" hidden>
+                <span class="field-label">槽位置 (桌面 X/Y)</span>
+                <div class="compact-fields">
+                  <label>X<input id="plateX" type="number" step="0.01" value="-0.08" /></label>
+                  <label>Y<input id="plateY" type="number" step="0.01" value="-0.72" /></label>
+                </div>
+              </div>
+              <span class="field-label">桌面尺寸</span>
+              <div class="compact-fields">
+                <label>长(X)<input id="tableX" type="number" step="0.05" value="0.40" /></label>
+                <label>宽(Y)<input id="tableY" type="number" step="0.05" value="0.30" /></label>
+              </div>
+              <button class="button primary wide" id="rebuildSceneButton" type="button"><i data-lucide="refresh-cw"></i><span>应用并重建场景</span></button>
+              <p class="inline-status" id="sceneStatus"></p>
+            </section>
+          </div>
+
+          <div class="panel-content" data-panel-content="poses">
+            <section class="panel-section">
+              <div class="section-heading">
+                <div><span class="eyebrow">POSES</span><h2>姿态库</h2></div>
+                <button class="icon-button" id="reloadPosesButton" type="button" aria-label="重载姿态库" title="重载姿态库"><i data-lucide="refresh-cw"></i></button>
+              </div>
+              <button class="button wide" id="recordPoseButton" type="button"><i data-lucide="crosshair"></i><span>记录当前位姿</span></button>
+              <div class="vlm-fields" id="poseEditor" style="display:none; margin-top:10px">
+                <label class="vlm-field"><span class="field-label">ID (英文, 模型调用用)</span><input id="poseId" type="text" class="text-input" placeholder="raise_hand" /></label>
+                <label class="vlm-field"><span class="field-label">名称 (中文)</span><input id="poseNameInput" type="text" class="text-input" placeholder="抬手" /></label>
+                <label class="vlm-field vlm-field-full"><span class="field-label">描述 (给模型看)</span><input id="poseDesc" type="text" class="text-input" placeholder="手臂举到头部高度, 用于挥手展示" /></label>
+                <div class="compact-fields">
+                  <label>X<input id="poseX" type="number" step="0.001" readonly style="opacity:0.7" /></label>
+                  <label>Y<input id="poseY" type="number" step="0.001" readonly style="opacity:0.7" /></label>
+                </div>
+                <label class="vlm-field"><span class="field-label">Z</span><input id="poseZ" type="number" step="0.001" class="text-input" readonly style="opacity:0.7" /></label>
+                <label class="vlm-field">
+                  <span class="field-label">朝向模式</span>
+                  <select id="poseOrientationMode" class="text-input" style="height:32px">
+                    <option value="vertical">垂直 (vertical)</option>
+                    <option value="side">侧向 (side)</option>
+                    <option value="z_parallel">斜向 (z_parallel)</option>
+                  </select>
+                </label>
+                <button class="button primary wide" id="addPoseButton" type="button"><i data-lucide="plus"></i><span>添加到姿态库</span></button>
+              </div>
+              <div class="item-list" id="posesList" style="margin-top:12px"></div>
+              <p class="inline-status" id="posesStatus">姿态库未读取</p>
+            </section>
+          </div>
+
+          <div class="panel-content" data-panel-content="logs">
+            <section class="panel-section logs-section">
+              <div class="section-heading">
+                <div><span class="eyebrow">SYSTEM</span><h2>系统日志</h2></div>
+                <button class="icon-button" id="refreshLogsButton" type="button" aria-label="刷新日志" title="刷新日志"><i data-lucide="refresh-cw"></i></button>
+              </div>
+              <div class="log-filter">
+                <select id="logLevelFilter" aria-label="日志级别">
+                  <option value="all">全部</option>
+                  <option value="ERROR">错误</option>
+                  <option value="WARN">警告</option>
+                  <option value="INFO">信息</option>
+                  <option value="DEBUG">调试</option>
+                </select>
+                <label><input id="logAutoRefresh" type="checkbox" checked />自动刷新</label>
+              </div>
+              <pre class="log-viewer" id="logViewer">正在读取日志...</pre>
+            </section>
+          </div>
+        </aside>
+
+        <section class="scene-panel">
+          <canvas id="robotScene" aria-label="UnoArm 真实 URDF 三维模型"></canvas>
+          <div class="scene-toolbar" role="toolbar" aria-label="三维视图工具">
+            <button class="icon-button" id="fitViewButton" type="button" aria-label="适配模型" title="适配模型"><i data-lucide="scan"></i></button>
+            <button class="icon-button" id="frontViewButton" type="button" aria-label="正视图" title="正视图"><i data-lucide="view"></i></button>
+            <button class="icon-button" id="resetViewButton" type="button" aria-label="重置视图" title="重置视图"><i data-lucide="rotate-ccw"></i></button>
+          </div>
+          <div class="scene-load-state" id="sceneLoadState">
+            <span class="spinner"></span><span>正在加载 UnoArm URDF...</span>
+          </div>
+          <div class="scene-legend">
+            <span><i class="legend-dot target"></i>目标位姿</span>
+            <span><i class="legend-dot benchmark"></i>跑分点</span>
+            <span><i class="legend-dot vision"></i>视觉目标</span>
+            <span><i class="legend-dot obstacle"></i>避障区</span>
+          </div>
+          <div class="scene-summary">
+            <span id="sceneFps">-- FPS</span>
+            <span id="sceneModelState">URDF 加载中</span>
+          </div>
+        </section>
+
+        <aside class="inspector-panel" id="inspectorPanel">
+          <section class="inspector-section">
+            <div class="section-heading">
+              <div><span class="eyebrow">ROBOT</span><h2>机器人状态</h2></div>
+              <span class="state-badge" id="robotOverallState">连接中</span>
+            </div>
+            <div class="arm-state-grid">
+              <div class="arm-state-row" id="rightArmState"><b>右臂</b><span>--</span><span>--</span></div>
+              <div class="arm-state-row" id="leftArmState"><b>左臂</b><span>--</span><span>--</span></div>
+            </div>
+            <div class="gripper-control-row">
+              <span class="state-badge" id="gripperState">夹爪未知</span>
+              <button class="button" id="gripperOpenButton" type="button"><i data-lucide="unfold-horizontal"></i><span>张开夹爪</span></button>
+              <button class="button" id="gripperCloseButton" type="button"><i data-lucide="fold-horizontal"></i><span>闭合夹爪</span></button>
+            </div>
+            <div class="robot-command-grid">
+              <button class="button good" id="enableButton" type="button"><i data-lucide="power"></i><span>双臂使能</span></button>
+              <button class="button" id="disableButton" type="button"><i data-lucide="power-off"></i><span>取消使能</span></button>
+              <button class="button warning" id="resetEstopButton" type="button"><i data-lucide="shield-alert"></i><span>复位急停</span></button>
+              <button class="button" id="homeButton" type="button"><i data-lucide="house"></i><span>双臂规划回零</span></button>
+              <button class="button task-reset-button" id="taskResetButton" type="button"><i data-lucide="rotate-ccw"></i><span>任务归零</span></button>
+            </div>
+          </section>
+
+          <section class="inspector-section">
+            <div class="section-heading"><div><span class="eyebrow">JOINT STATE</span><h2 id="jointPanelTitle">右臂关节</h2></div><span id="jointStamp" class="muted-value">--</span></div>
+            <div class="joint-telemetry" id="jointTelemetry"></div>
+          </section>
+
+          <section class="inspector-section">
+            <div class="section-heading"><div><span class="eyebrow">END TOOL</span><h2>末端位置</h2></div></div>
+            <dl class="metric-list">
+              <div><dt>X</dt><dd id="tcpX">--</dd></div>
+              <div><dt>Y</dt><dd id="tcpY">--</dd></div>
+              <div><dt>Z</dt><dd id="tcpZ">--</dd></div>
+            </dl>
+          </section>
+
+          <section class="inspector-section vision-readout">
+            <div class="section-heading"><div><span class="eyebrow">VISION TARGET</span><h2>视觉目标</h2></div></div>
+            <dl class="metric-list">
+              <div><dt>X</dt><dd id="visionX">--</dd></div>
+              <div><dt>Y</dt><dd id="visionY">--</dd></div>
+              <div><dt>Z</dt><dd id="visionZ">--</dd></div>
+            </dl>
+          </section>
+
+          <section class="inspector-section">
+            <div class="section-heading">
+              <div><span class="eyebrow">DECISION</span><h2>运动模式决策</h2></div>
+              <span class="state-badge" id="decisionState">预览</span>
+            </div>
+            <div class="decision-preview" id="decisionPreview" aria-live="polite"></div>
+          </section>
+        </aside>
+      </main>
+
+      <footer class="app-footer">
+        <span id="footerMessage">等待控制服务...</span>
+        <span id="footerClock">--:--:--</span>
+      </footer>
+    </div>
+
+    <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+    <div class="confirm-dialog" id="confirmDialog" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
+      <div class="confirm-surface">
+        <div class="confirm-icon"><i data-lucide="triangle-alert"></i></div>
+        <h2 id="confirmTitle">确认操作</h2>
+        <p id="confirmMessage"></p>
+        <div class="command-row">
+          <button class="button" id="confirmCancel" type="button">取消</button>
+          <button class="button danger" id="confirmAccept" type="button">确认</button>
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>

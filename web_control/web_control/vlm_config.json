@@ -1,0 +1,9 @@
+{
+  "api_key": "sk-nvoecmoeqqsxtkunstrqsqpffegyewdvraqtbidrxixmsugc",
+  "base_url": "https://api.siliconflow.cn/v1",
+  "model": "Qwen/Qwen3-VL-30B-A3B-Instruct",
+  "prompt": "识别图像中的红色矩形物体并给出归一化边界框",
+  "offset_x": 0.0,
+  "offset_y": 0.0,
+  "offset_z": -0.1
+}

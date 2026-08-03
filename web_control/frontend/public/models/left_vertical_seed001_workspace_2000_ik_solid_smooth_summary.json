@@ -1,0 +1,48 @@
+{
+  "model": "voxel_knn_largest_component",
+  "region": {
+    "min": [
+      -0.2,
+      -0.9,
+      0.6
+    ],
+    "max": [
+      0.5,
+      -0.2,
+      1.1
+    ]
+  },
+  "total_points": 2000,
+  "success_points": 415,
+  "failure_points": 1585,
+  "success_field": "ik_ok",
+  "success_label": "IK",
+  "sample_success_rate": 0.2075,
+  "workspace_volume_m3": 0.24500000000000002,
+  "workspace_volume_liters": 245.00000000000003,
+  "fitted_volume_m3": 0.05197887811634349,
+  "fitted_volume_liters": 51.97887811634349,
+  "workspace_share": 0.2121586861891571,
+  "raw_occupied_voxels": 8578,
+  "kept_voxels": 8578,
+  "removed_voxels": 0,
+  "mesh_vertices": 3518,
+  "mesh_faces": 3530,
+  "smooth_iterations": 12,
+  "smooth_lambda": 0.45,
+  "smooth_mu": -0.47,
+  "grid": {
+    "nx": 38,
+    "ny": 38,
+    "nz": 28
+  },
+  "k": 18,
+  "threshold": 0.5,
+  "cell_size_m": {
+    "x": 0.018421052631578946,
+    "y": 0.018421052631578946,
+    "z": 0.01785714285714286
+  },
+  "voxel_volume_m3": 6.059556786703601e-06,
+  "mean_voxel_probability": 0.2118316624895572
+}

@@ -1,0 +1,10 @@
+master2_encoder_publisher:
+  ros__parameters:
+    publish_rate_hz: 100.0
+    joint_names: [Right_Joint1, Right_Joint2, Right_Joint3, Right_Joint4, Right_Joint5,
+      Right_Joint6, Right_Joint7]
+    zero_offsets: [4841112, 8192000, -235000, 71720, 8349312, 87000, 5305000]
+    directions: [1, 1, 1, 1, 1, 1, 1]
+    encoder_counts_per_rev: [8388608.0, 8388608.0, 8388608.0, 8388608.0, 8388608.0,
+      8388608.0, 8388608.0]
+    gear_ratios: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]

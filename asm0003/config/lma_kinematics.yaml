@@ -1,0 +1,10 @@
+arm:
+  kinematics_solver: lma_kinematics_plugin/LMAKinematicsPlugin
+  kinematics_solver_search_resolution: 0.002
+  kinematics_solver_timeout: 0.2
+  kinematics_solver_attempts: 5
+left_arm:
+  kinematics_solver: lma_kinematics_plugin/LMAKinematicsPlugin
+  kinematics_solver_search_resolution: 0.002
+  kinematics_solver_timeout: 0.2
+  kinematics_solver_attempts: 5

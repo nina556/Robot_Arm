@@ -1,0 +1,14 @@
+.git
+build
+install
+log
+logs
+**/build
+**/install
+**/log
+**/logs
+**/node_modules
+**/.pytest_cache
+**/__pycache__
+web_control/frontend/dist
+*.pyc

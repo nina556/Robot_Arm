@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot name="asm0003">
+  <group name="arm">
+    <chain base_link="right_base_link" tip_link="Right_Gripper_TCP"/>
+  </group>
+  <group name="left_arm">
+    <chain base_link="left_base_link" tip_link="Left_Gripper_TCP"/>
+  </group>
+  <group_state name="home" group="arm">
+    <joint name="Right_Joint1" value="0"/>
+    <joint name="Right_Joint2" value="0"/>
+    <joint name="Right_Joint3" value="0"/>
+    <joint name="Right_Joint4" value="0"/>
+    <joint name="Right_Joint5" value="0"/>
+    <joint name="Right_Joint6" value="0"/>
+    <joint name="Right_Joint7" value="0"/>
+  </group_state>
+  <group_state name="home" group="left_arm">
+    <joint name="Left_Joint1" value="0"/>
+    <joint name="Left_Joint2" value="0"/>
+    <joint name="Left_Joint3" value="0"/>
+    <joint name="Left_Joint4" value="0"/>
+    <joint name="Left_Joint5" value="0"/>
+    <joint name="Left_Joint6" value="0"/>
+    <joint name="Left_Joint7" value="0"/>
+  </group_state>
+  <disable_collisions link1="base_link" link2="right_base_link" reason="Adjacent"/>
+  <disable_collisions link1="base_link" link2="left_base_link" reason="Adjacent"/>
+
+  <!-- Right arm adjacent link self-collision disabled because joint collision meshes overlap -->
+  <disable_collisions link1="right_base_link" link2="Right_Link1" reason="Adjacent"/>
+  <disable_collisions link1="Right_Link1" link2="Right_Link2" reason="Adjacent"/>
+  <disable_collisions link1="Right_Link2" link2="Right_Link3" reason="Adjacent"/>
+  <disable_collisions link1="Right_Link3" link2="Right_Link4" reason="Adjacent"/>
+  <disable_collisions link1="Right_Link4" link2="Right_Link5" reason="Adjacent"/>
+  <disable_collisions link1="Right_Link5" link2="Right_Link6" reason="Adjacent"/>
+  <disable_collisions link1="Right_Link6" link2="Right_Link7" reason="Adjacent"/>
+  <disable_collisions link1="Right_Link5" link2="Right_Link7" reason="Default"/>
+
+  <!-- Left arm adjacent link self-collision disabled because joint collision meshes overlap -->
+  <disable_collisions link1="left_base_link" link2="Left_Link1" reason="Adjacent"/>
+  <disable_collisions link1="Left_Link1" link2="Left_Link2" reason="Adjacent"/>
+  <disable_collisions link1="Left_Link2" link2="Left_Link3" reason="Adjacent"/>
+  <disable_collisions link1="Left_Link3" link2="Left_Link4" reason="Adjacent"/>
+  <disable_collisions link1="Left_Link4" link2="Left_Link5" reason="Adjacent"/>
+  <disable_collisions link1="Left_Link5" link2="Left_Link6" reason="Adjacent"/>
+  <disable_collisions link1="Left_Link6" link2="Left_Link7" reason="Adjacent"/>
+  <disable_collisions link1="Left_Link5" link2="Left_Link7" reason="Default"/>
+</robot>

@@ -1,0 +1,49 @@
+# IK-success smoke poses captured from a local MuJoCo + MoveIt run.
+# Use this to compare planners on poses that passed /compute_ik once.
+
+frame_id: world
+moveit_request_frame: base_link
+seed: 7
+count: 1
+
+regions:
+  smoke_right_1:
+    sampler: box
+    arm: right
+    x: -0.3794577455505267
+    y: -0.5978009677027639
+    z: 1.1559485865515362
+    roll: 3.1415926536
+    pitch: 0.0
+    yaw: -0.41691646548179806
+
+  smoke_right_2:
+    sampler: box
+    arm: right
+    x: -0.7196662628891883
+    y: -0.5683582879905215
+    z: 1.0896153513140112
+    roll: 3.1415926536
+    pitch: 0.0
+    yaw: -2.3637219903020017
+
+  smoke_left_1:
+    sampler: box
+    arm: left
+    x: 0.6567994836055214
+    y: -0.3676272384367129
+    z: 1.3062362930189275
+    roll: 3.1415926536
+    pitch: 0.0
+    yaw: 0.5019963736634976
+
+moveit_plan:
+  ik_service: /compute_ik
+  plan_service: /plan_kinematic_path
+  ik_timeout_sec: 2.0
+  planning_time_sec: 3.0
+  wait_service_sec: 8.0
+  attempts: 3
+  avoid_collisions: true
+  velocity_scaling: 0.05
+  acceleration_scaling: 0.05

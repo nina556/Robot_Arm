@@ -1,0 +1,68 @@
+[
+  {
+    "x": 0.016,
+    "y": -0.77,
+    "z": 0.725,
+    "roll": 0,
+    "pitch": 0.5235987755982988,
+    "yaw": 0,
+    "arm": "right",
+    "velocity_scaling": 0.3,
+    "acceleration_scaling": 0.3,
+    "orientation_tolerance": 0.5,
+    "stay_near": false,
+    "avoid_platform": true,
+    "collision_boxes": [
+      {
+        "id": "box_1",
+        "name": "碰撞箱 1",
+        "enabled": false,
+        "center": [
+          0,
+          -0.6,
+          0.33
+        ],
+        "dimensions": [
+          0.4,
+          0.3,
+          1
+        ],
+        "rpy": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "box_2",
+        "name": "碰撞箱 2",
+        "enabled": false,
+        "center": [
+          0,
+          0,
+          0
+        ],
+        "dimensions": [
+          0.27,
+          0.3,
+          3
+        ],
+        "rpy": [
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "grasp_orientation_mode": "angled_grasp",
+    "planner_id": "RRTConnectkConfigDefault",
+    "planning_time": 1,
+    "attempts": 1,
+    "ik_timeout": 0.6,
+    "name": "12:55:41",
+    "pick_approach": 0.1,
+    "pick_descend": 0.05,
+    "pick_hold": 1,
+    "pick_lift": 0.1
+  }
+]
